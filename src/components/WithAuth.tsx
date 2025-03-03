@@ -4,7 +4,7 @@ import React from 'react';
 
 export const WithAuth: React.FC<React.PropsWithChildren> = ({ children }) => {
   const user = useAuthContext();
-  if (!user) {
+  if (!user || !user[0]) {
     return <Navigate to={'/auth'} />;
   }
   return (

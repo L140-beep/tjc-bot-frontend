@@ -1,29 +1,41 @@
+import { BrowserRouter, Route, Routes } from 'react-router';
+import { Auth } from './Auth';
 import { useState } from 'react';
-import reactLogo from '../assets/react.svg';
+import { AuthContext } from './context/AuthContext';
+import { User } from '../types';
 import { WithAuth } from './WithAuth';
+import { Main } from './Main';
 
-function App() {
-  const [count, setCount] = useState(0);
+export const App: React.FC = () => {
+  const getCachedUser = () => {
+    sessionStorage;
+    const isAdmin = Boolean(sessionStorage.getItem('isAdmin'));
+    const token = sessionStorage.getItem('token');
+    console.log(isAdmin);
+    if (isAdmin === undefined || !token) return null;
 
+    return {
+      isAdmin,
+      token,
+    };
+  };
+  // TODO: заменить на редьюсер
+  const [currentUser, serCurrentUser] = useState<User | null>(getCachedUser());
   return (
-    <WithAuth>
-      <div>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div>
-        <button className="flex bg-amber-400" onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">Click on the Vite and React logos to learn more</p>
-    </WithAuth>
+    <AuthContext.Provider value={[currentUser, serCurrentUser]}>
+      <BrowserRouter>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <WithAuth>
+                <Main />
+              </WithAuth>
+            }
+          ></Route>
+          <Route path="/auth" element={<Auth />}></Route>
+        </Routes>
+      </BrowserRouter>
+    </AuthContext.Provider>
   );
-}
-
-export default App;
+};

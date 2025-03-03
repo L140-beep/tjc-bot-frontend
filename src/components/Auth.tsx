@@ -1,11 +1,14 @@
-import { ChangeEvent, FormEvent, useState } from 'react';
+import { useState } from 'react';
 import { Input } from './Input';
 import { Title } from './Title';
 import { useAuthContext } from './context/AuthContext';
 import { getConfig } from '../config';
 import { twMerge } from 'tailwind-merge';
+import { useNavigate } from 'react-router';
 
 export const Auth: React.FC = () => {
+  const context = useAuthContext();
+  const navigate = useNavigate();
   const [error, setError] = useState<string | undefined>(undefined);
   const [login, setLogin] = useState<string | undefined>(undefined);
   const [password, setPassword] = useState<string | undefined>(undefined);
@@ -19,21 +22,60 @@ export const Auth: React.FC = () => {
   };
 
   const handleSubmit = async (e: any) => {
+    if (!context) {
+      throw new Error('Ошибка! Отсутствует контекст!');
+    }
     e.preventDefault();
     e.target.reset();
-    const { SERVER_HOST, SERVER_PORT } = getConfig();
-    setIsWaitingData(true);
-    const response = await fetch(`http://${SERVER_HOST}:${SERVER_PORT}/token`, {
-      mode: 'no-cors',
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded', accept: 'application/json' },
-      body: JSON.stringify({ password, username: login }),
-    });
-    console.log(JSON.stringify({ password, username: login }));
-    console.log(response);
-    // console.log(password);
 
-    clear();
+    if (!password || !login) return;
+
+    const [, serCurrentUser] = context;
+    const { SERVER_HOST, SERVER_PORT } = getConfig();
+
+    setIsWaitingData(true);
+
+    const formData = new FormData();
+
+    formData.append('password', password);
+    formData.append('username', login);
+    try {
+      const response = await fetch(`http://${SERVER_HOST}:${SERVER_PORT}/token`, {
+        mode: 'cors',
+        method: 'POST',
+        headers: { 'Access-Control-Allow-Origin': '*', accept: 'application/json' },
+        body: formData,
+      });
+      if (!response.ok) {
+        setError('Неверный логин или пароль!');
+        setIsWaitingData(false);
+        return;
+      }
+      const token = (await response.json())['access_token'];
+      const adminResponse = await fetch(`http://${SERVER_HOST}:${SERVER_PORT}/token`, {
+        mode: 'cors',
+        method: 'POST',
+        headers: { 'Access-Control-Allow-Origin': '*', accept: 'application/json' },
+        body: formData,
+      })
+        .then(async (rawResponse) => await rawResponse.json())
+        .catch((e) => clear());
+
+      const isAdmin = adminResponse['is_admin'];
+      serCurrentUser({
+        token: token,
+        isAdmin: isAdmin,
+      });
+
+      sessionStorage.clear();
+      if (response.ok) {
+        sessionStorage.setItem('isAdmin', isAdmin);
+        sessionStorage.setItem('token', token);
+        navigate('/');
+      }
+    } finally {
+      clear();
+    }
   };
   const onLoginChange = (value: string) => {
     setLogin(value);
@@ -63,7 +105,7 @@ export const Auth: React.FC = () => {
             required={true}
             disabled={isWaitingData}
           />
-          {}
+          {error && <span className="text-red-500"> {error} </span>}
           <button
             disabled={isWaitingData}
             className={twMerge(
