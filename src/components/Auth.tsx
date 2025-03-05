@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Input } from './Input';
 import { Title } from './Title';
 import { useAuthContext } from './context/AuthContext';
-import { getConfig } from '../config';
 import { twMerge } from 'tailwind-merge';
 import { useNavigate } from 'react-router';
 
@@ -31,7 +30,6 @@ export const Auth: React.FC = () => {
     if (!password || !login) return;
 
     const [, serCurrentUser] = context;
-    const { SERVER_HOST, SERVER_PORT } = getConfig();
 
     setIsWaitingData(true);
 
@@ -40,7 +38,7 @@ export const Auth: React.FC = () => {
     formData.append('password', password);
     formData.append('username', login);
     try {
-      const response = await fetch(`http://${SERVER_HOST}:${SERVER_PORT}/token`, {
+      const response = await fetch(`api/token`, {
         mode: 'cors',
         method: 'POST',
         headers: { 'Access-Control-Allow-Origin': '*', accept: 'application/json' },
@@ -51,7 +49,7 @@ export const Auth: React.FC = () => {
         return;
       }
       const token = (await response.json())['access_token'];
-      const adminResponse = await fetch(`http://${SERVER_HOST}:${SERVER_PORT}/token`, {
+      const adminResponse = await fetch(`api/token`, {
         mode: 'cors',
         method: 'POST',
         headers: { 'Access-Control-Allow-Origin': '*', accept: 'application/json' },

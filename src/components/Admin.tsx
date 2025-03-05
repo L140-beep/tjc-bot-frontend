@@ -1,4 +1,4 @@
-import { getConfig } from '../config';
+import { useNavigate } from 'react-router';
 import { ButtonsList } from './ButtonsList';
 import { useAuthContext } from './context/AuthContext';
 import { Title } from './Title';
@@ -8,8 +8,8 @@ import { twMerge } from 'tailwind-merge';
 
 export const Admin: React.FC = () => {
   const [message, setMessage] = useState<string | null>(null);
-  const { SERVER_HOST, SERVER_PORT } = getConfig();
   const [user] = useAuthContext();
+  const navigate = useNavigate();
   const [blocked, setBlocked] = useState<boolean | null>(null);
 
   const saveFile = (blob: Blob, name: string) => {
@@ -33,7 +33,7 @@ export const Admin: React.FC = () => {
   };
 
   const handleScore = async () => {
-    const response = await fetch(`http://${SERVER_HOST}:${SERVER_PORT}/rate`, {
+    const response = await fetch(`/rate`, {
       mode: 'cors',
       method: 'GET',
       headers: {
@@ -49,7 +49,7 @@ export const Admin: React.FC = () => {
   };
 
   useEffect(() => {
-    fetch(`http://${SERVER_HOST}:${SERVER_PORT}/isBlocked`, {
+    fetch(`api/isBlocked`, {
       mode: 'cors',
       method: 'GET',
       headers: {
@@ -63,8 +63,7 @@ export const Admin: React.FC = () => {
 
   useEffect(() => {
     setInterval(async () => {
-      console.log('aaaa');
-      fetch(`http://${SERVER_HOST}:${SERVER_PORT}/isBlocked`, {
+      fetch(`api/isBlocked`, {
         mode: 'cors',
         method: 'GET',
         headers: {
@@ -82,7 +81,7 @@ export const Admin: React.FC = () => {
   }, []);
 
   const handleBlock = async () => {
-    const response = await fetch(`http://${SERVER_HOST}:${SERVER_PORT}/switch`, {
+    const response = await fetch(`api/switch`, {
       mode: 'cors',
       method: 'POST',
       headers: {
@@ -112,8 +111,19 @@ export const Admin: React.FC = () => {
     },
   ];
 
+  const logout = () => {
+    sessionStorage.clear();
+    navigate('/auth');
+  };
+
   return (
     <div className="flex h-[100vh] w-[100wh] flex-col place-content-center items-center gap-2 bg-gray-700">
+      <button
+        className="absolute top-3 right-7 h-8 w-24 cursor-pointer rounded border border-none bg-[#324ab2] text-gray-200"
+        onClick={logout}
+      >
+        Выйти
+      </button>
       <Title />
       <div
         className={twMerge(

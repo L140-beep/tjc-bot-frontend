@@ -3,22 +3,22 @@ import { Input } from './Input';
 import { Title } from './Title';
 import { twMerge } from 'tailwind-merge';
 import { ButtonsList } from './ButtonsList';
-import { getConfig } from '../config';
 import { useAuthContext } from './context/AuthContext';
+import { useNavigate } from 'react-router';
 
 export const Chat: React.FC = () => {
   const [message, setMessage] = useState<string | undefined>(undefined);
   const [isWaitingData, setIsWaitingData] = useState<boolean>(false);
   const [isBlocked, setIsBlocked] = useState<boolean>(true);
   const [user] = useAuthContext();
-  const { SERVER_HOST, SERVER_PORT } = getConfig();
+  const navigate = useNavigate();
   const onMessageChange = (value: string) => {
     setMessage(value);
   };
   const [responseText, setResponseText] = useState<string[] | null>(null);
 
   useLayoutEffect(() => {
-    fetch(`http://${SERVER_HOST}:${SERVER_PORT}/isBlocked`, {
+    fetch(`api/isBlocked`, {
       mode: 'cors',
       method: 'GET',
       headers: {
@@ -33,8 +33,7 @@ export const Chat: React.FC = () => {
 
   useEffect(() => {
     setInterval(async () => {
-      console.log('aaaa');
-      fetch(`http://${SERVER_HOST}:${SERVER_PORT}/isBlocked`, {
+      fetch(`api/isBlocked`, {
         mode: 'cors',
         method: 'GET',
         headers: {
@@ -55,7 +54,7 @@ export const Chat: React.FC = () => {
     e.preventDefault();
     console.log(`Отправлено сообщение ${message}!`);
     setIsWaitingData(true);
-    const response = await fetch(`http://${SERVER_HOST}:${SERVER_PORT}/attempt`, {
+    const response = await fetch(`api/attempt`, {
       mode: 'cors',
       method: 'POST',
       headers: {
@@ -85,7 +84,7 @@ export const Chat: React.FC = () => {
 
   const handleStatus = async () => {
     console.log(user.token);
-    const response = await fetch(`http://${SERVER_HOST}:${SERVER_PORT}/status`, {
+    const response = await fetch(`api/status`, {
       mode: 'cors',
       method: 'GET',
       headers: {
@@ -104,8 +103,19 @@ export const Chat: React.FC = () => {
     },
   ];
 
+  const logout = () => {
+    sessionStorage.clear();
+    navigate('/auth');
+  };
+
   return (
     <div className="flex h-[100vh] w-[100wh] flex-row place-content-center items-center gap-2 bg-gray-700">
+      <button
+        className="absolute top-3 right-7 h-8 w-24 cursor-pointer rounded border border-none bg-[#324ab2] text-gray-200"
+        onClick={logout}
+      >
+        Выйти
+      </button>
       <div>
         <ButtonsList buttons={buttons} />
       </div>
