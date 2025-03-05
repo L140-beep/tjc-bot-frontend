@@ -47,7 +47,6 @@ export const Auth: React.FC = () => {
         body: formData,
       });
       if (!response.ok) {
-        setError('Неверный логин или пароль!');
         setIsWaitingData(false);
         return;
       }
@@ -57,9 +56,7 @@ export const Auth: React.FC = () => {
         method: 'POST',
         headers: { 'Access-Control-Allow-Origin': '*', accept: 'application/json' },
         body: formData,
-      })
-        .then(async (rawResponse) => await rawResponse.json())
-        .catch((e) => clear());
+      }).then(async (rawResponse) => await rawResponse.json());
 
       const isAdmin = adminResponse['is_admin'];
       serCurrentUser({
@@ -75,6 +72,7 @@ export const Auth: React.FC = () => {
       }
     } finally {
       clear();
+      setError('Неверный логин или пароль!');
     }
   };
   const onLoginChange = (value: string) => {

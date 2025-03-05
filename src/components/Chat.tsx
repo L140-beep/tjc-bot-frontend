@@ -1,4 +1,4 @@
-import { useContext, useLayoutEffect, useState } from 'react';
+import { useContext, useEffect, useLayoutEffect, useState } from 'react';
 import { Input } from './Input';
 import { Title } from './Title';
 import { twMerge } from 'tailwind-merge';
@@ -15,7 +15,7 @@ export const Chat: React.FC = () => {
   const onMessageChange = (value: string) => {
     setMessage(value);
   };
-  const [responseText, setResponseText] = useState<string | null>(null);
+  const [responseText, setResponseText] = useState<string[] | null>(null);
 
   useLayoutEffect(() => {
     fetch(`http://${SERVER_HOST}:${SERVER_PORT}/isBlocked`, {
@@ -27,9 +27,29 @@ export const Chat: React.FC = () => {
         accept: 'application/json',
       },
     }).then((response) =>
-      response.json().then((value) => setIsBlocked(Boolean(value['isBlocked']))),
+      response.json().then((value) => setIsBlocked(value['isBlocked'] !== 'False')),
     );
   });
+
+  useEffect(() => {
+    setInterval(async () => {
+      console.log('aaaa');
+      fetch(`http://${SERVER_HOST}:${SERVER_PORT}/isBlocked`, {
+        mode: 'cors',
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+          'Access-Control-Allow-Origin': '*',
+          accept: 'application/json',
+        },
+      }).then((response) =>
+        response.json().then((value) => {
+          // console.log(value, value['isBlocked'] === 'False');
+          setIsBlocked(value['isBlocked'] !== 'False');
+        }),
+      );
+    }, 5000);
+  }, []);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -42,17 +62,25 @@ export const Chat: React.FC = () => {
         Authorization: `Bearer ${user.token}`,
         'Access-Control-Allow-Origin': '*',
         accept: 'application/json',
+        'Content-Type': 'application/json',
       },
       // headers: { 'Content-Type': 'application/x-www-form-urlencoded', accept: 'application/json' },
-      body: JSON.stringify({ msg: message }),
+      body: JSON.stringify({ msg: message }, null, 4),
     });
-    console.log(await response.json());
+    const jsonResponse = await response.json();
+    // const a = await response.text();
+    // console.log(JSON.parse(a));
+    // setResponseText(`${await response.text()}`);
     setIsWaitingData(false);
     if (!response.ok) {
-      setResponseText('Ошибка входных данных!');
+      setResponseText(
+        jsonResponse['error']
+          ? [jsonResponse['error'], jsonResponse['text']]
+          : ['Ошибка входных данных!'],
+      );
       return;
     }
-    setResponseText(`${await response.text()}`);
+    setResponseText([jsonResponse['text']]);
   };
 
   const handleStatus = async () => {
@@ -66,7 +94,7 @@ export const Chat: React.FC = () => {
         accept: 'application/json',
       },
     });
-    setResponseText((await response.json())['text'].join('\n\n'));
+    setResponseText([(await response.json())['text']]);
   };
 
   const buttons = [
@@ -88,7 +116,7 @@ export const Chat: React.FC = () => {
         <form onSubmit={handleSubmit} className="flex flex-col items-center gap-3">
           <div
             className={twMerge(
-              'h-72 w-full rounded border border-gray-400 px-2 py-1 text-left text-gray-200',
+              'h-72 w-72 rounded border border-gray-400 px-2 py-1 text-left text-gray-200',
               responseText === null && 'text-gray-500',
             )}
           >
@@ -96,7 +124,13 @@ export const Chat: React.FC = () => {
               ? isBlocked
                 ? 'Отправка сообщений запрещена'
                 : 'Отправка сообщений разрешена'
-              : responseText}
+              : responseText.map((value) => {
+                  return (
+                    <p>
+                      {value} <br></br> <br />
+                    </p>
+                  );
+                })}
           </div>
           <Input
             maxLength={200}

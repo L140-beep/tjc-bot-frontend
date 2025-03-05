@@ -61,6 +61,26 @@ export const Admin: React.FC = () => {
     return;
   }, []);
 
+  useEffect(() => {
+    setInterval(async () => {
+      console.log('aaaa');
+      fetch(`http://${SERVER_HOST}:${SERVER_PORT}/isBlocked`, {
+        mode: 'cors',
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+          'Access-Control-Allow-Origin': '*',
+          accept: 'application/json',
+        },
+      }).then((response) =>
+        response.json().then((value) => {
+          // console.log(value, value['isBlocked'] === 'False');
+          setBlocked(value['isBlocked'] !== 'False');
+        }),
+      );
+    }, 5000);
+  }, []);
+
   const handleBlock = async () => {
     const response = await fetch(`http://${SERVER_HOST}:${SERVER_PORT}/switch`, {
       mode: 'cors',
