@@ -1,7 +1,6 @@
 import { getConfig } from '../config';
 import { ButtonsList } from './ButtonsList';
 import { useAuthContext } from './context/AuthContext';
-import FileSaver from 'file-saver';
 import { Title } from './Title';
 import { useEffect, useState } from 'react';
 import { twMerge } from 'tailwind-merge';

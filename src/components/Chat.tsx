@@ -66,9 +66,7 @@ export const Chat: React.FC = () => {
         accept: 'application/json',
       },
     });
-    console.log(await response.json());
-    console.log(typeof (await response.json())['text']);
-    setResponseText((await response.json())['text']);
+    setResponseText((await response.json())['text'].join('\n\n'));
   };
 
   const buttons = [
@@ -111,7 +109,7 @@ export const Chat: React.FC = () => {
           <button
             disabled={isWaitingData || isBlocked}
             className={twMerge(
-              'text h-8 w-full cursor-pointer break-after-all rounded border-none bg-[#324ab2] text-gray-200',
+              'text h-8 w-full cursor-pointer rounded border-none bg-[#324ab2] break-all text-gray-200',
               (isWaitingData || isBlocked) && 'cursor-default opacity-50',
             )}
             type="submit"

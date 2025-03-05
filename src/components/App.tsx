@@ -9,8 +9,9 @@ import { Main } from './Main';
 export const App: React.FC = () => {
   const getCachedUser = () => {
     sessionStorage;
-    const isAdmin = Boolean(sessionStorage.getItem('isAdmin'));
+    const isAdmin = sessionStorage.getItem('isAdmin') === 'true';
     const token = sessionStorage.getItem('token');
+    console.log(sessionStorage.getItem('isAdmin'));
     console.log(isAdmin);
     if (isAdmin === undefined || !token) return null;
 
