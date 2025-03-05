@@ -1,10 +1,10 @@
-import { useContext, useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { Input } from './Input';
 import { Title } from './Title';
 import { twMerge } from 'tailwind-merge';
 import { ButtonsList } from './ButtonsList';
 import { getConfig } from '../config';
-import { AuthContext, useAuthContext } from './context/AuthContext';
+import { useAuthContext } from './context/AuthContext';
 
 export const Chat: React.FC = () => {
   const [message, setMessage] = useState<string | undefined>(undefined);
