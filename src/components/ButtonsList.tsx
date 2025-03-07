@@ -12,7 +12,7 @@ interface ButtonsListProps {
 
 export const ButtonsList: React.FC<ButtonsListProps> = ({ buttons, buttonClassName }) => {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex w-full flex-col gap-2">
       {buttons.map((button) => (
         <Button className={buttonClassName} onClick={button.action} text={button.text} />
       ))}

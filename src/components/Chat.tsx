@@ -5,6 +5,7 @@ import { twMerge } from 'tailwind-merge';
 import { ButtonsList } from './ButtonsList';
 import { useAuthContext } from './context/AuthContext';
 import { useNavigate } from 'react-router';
+import { saveFile } from './utils';
 
 export const Chat: React.FC = () => {
   const [message, setMessage] = useState<string | undefined>(undefined);
@@ -96,10 +97,50 @@ export const Chat: React.FC = () => {
     setResponseText([(await response.json())['text']]);
   };
 
+  const handleDownloadTasks = async () => {
+    const response = await fetch(`api/tasks`, {
+      mode: 'cors',
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+        'Access-Control-Allow-Origin': '*',
+        accept: 'application/json',
+      },
+    });
+
+    const blob = await response.blob();
+    setMessage('Сохранено!');
+    saveFile(blob, 'задания.xlsx');
+  };
+
+  const handleBonus = async () => {
+    const response = await fetch(`api/bonus`, {
+      mode: 'cors',
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+        'Access-Control-Allow-Origin': '*',
+        accept: 'application/plaintext',
+      },
+    });
+    // console.log(await response.text());
+    const blob = await response.blob();
+    setMessage('Сохранено!');
+    saveFile(blob, 'бонусы.txt');
+  };
+
   const buttons = [
     {
       text: 'Статус',
       action: handleStatus,
+    },
+    {
+      text: 'Скачать задания',
+      action: handleDownloadTasks,
+    },
+    {
+      text: 'Бонусы',
+      action: handleBonus,
     },
   ];
 
@@ -116,9 +157,6 @@ export const Chat: React.FC = () => {
       >
         Выйти
       </button>
-      <div>
-        <ButtonsList buttons={buttons} />
-      </div>
       <div className="mb-[5%] flex-col items-center text-center">
         <div className="mb-3">
           <Title />
@@ -161,6 +199,9 @@ export const Chat: React.FC = () => {
             Отправить
           </button>
         </form>
+        <div className="mt-2">
+          <ButtonsList buttons={buttons} />
+        </div>
       </div>
     </div>
   );
