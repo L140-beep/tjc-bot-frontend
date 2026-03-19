@@ -5,6 +5,7 @@ import { Title } from './Title';
 import { useEffect, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { saveFile } from './utils';
+import { getApiUrl } from '../config';
 ('file-saver');
 
 export const Admin: React.FC = () => {
@@ -14,7 +15,7 @@ export const Admin: React.FC = () => {
   const [blocked, setBlocked] = useState<boolean | null>(null);
 
   const handleScore = async () => {
-    const response = await fetch(`api/rate`, {
+    const response = await fetch(getApiUrl('/api/rate'), {
       mode: 'cors',
       method: 'GET',
       headers: {
@@ -30,7 +31,7 @@ export const Admin: React.FC = () => {
   };
 
   useEffect(() => {
-    fetch(`api/isBlocked`, {
+    fetch(getApiUrl('/api/isBlocked'), {
       mode: 'cors',
       method: 'GET',
       headers: {
@@ -44,7 +45,7 @@ export const Admin: React.FC = () => {
 
   useEffect(() => {
     setInterval(async () => {
-      fetch(`api/isBlocked`, {
+      fetch(getApiUrl('/api/isBlocked'), {
         mode: 'cors',
         method: 'GET',
         headers: {
@@ -62,7 +63,7 @@ export const Admin: React.FC = () => {
   }, []);
 
   const handleBlock = async () => {
-    const response = await fetch(`api/switch`, {
+    const response = await fetch(getApiUrl('/api/switch'), {
       mode: 'cors',
       method: 'POST',
       headers: {
@@ -76,37 +77,37 @@ export const Admin: React.FC = () => {
     setBlocked((p) => !p);
   };
 
-  const handleDownloadResult = async () => {
-    const response = await fetch(`api/results`, {
-      mode: 'cors',
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${user.token}`,
-        'Access-Control-Allow-Origin': '*',
-        accept: 'application/json',
-      },
-    });
+  // const handleDownloadResult = async () => {
+  //   const response = await fetch(getApiUrl('/api/results'), {
+  //     mode: 'cors',
+  //     method: 'GET',
+  //     headers: {
+  //       Authorization: `Bearer ${user.token}`,
+  //       'Access-Control-Allow-Origin': '*',
+  //       accept: 'application/json',
+  //     },
+  //   });
 
-    const blob = await response.blob();
-    setMessage('Сохранено!');
-    saveFile(blob, 'баллы.xlsx');
-  };
+  //   const blob = await response.blob();
+  //   setMessage('Сохранено!');
+  //   saveFile(blob, 'баллы.xlsx');
+  // };
 
-  const handleDownloadTeamBonus = async () => {
-    const response = await fetch(`api/teamBonus`, {
-      mode: 'cors',
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${user.token}`,
-        'Access-Control-Allow-Origin': '*',
-        accept: 'application/json',
-      },
-    });
+  // const handleDownloadTeamBonus = async () => {
+  //   const response = await fetch(`api/teamBonus`, {
+  //     mode: 'cors',
+  //     method: 'GET',
+  //     headers: {
+  //       Authorization: `Bearer ${user.token}`,
+  //       'Access-Control-Allow-Origin': '*',
+  //       accept: 'application/json',
+  //     },
+  //   });
 
-    const blob = await response.blob();
-    setMessage('Сохранено!');
-    saveFile(blob, 'бонусы команд.xlsx');
-  };
+  //   const blob = await response.blob();
+  //   setMessage('Сохранено!');
+  //   saveFile(blob, 'бонусы команд.xlsx');
+  // };
 
   const buttons = [
     {
@@ -122,14 +123,14 @@ export const Admin: React.FC = () => {
             : 'Запретить отправку попыток',
       action: handleBlock,
     },
-    {
-      text: 'Скачать результаты',
-      action: handleDownloadResult,
-    },
-    {
-      text: 'Скачать бонусы команд',
-      action: handleDownloadTeamBonus,
-    },
+    // {
+    //   text: 'Скачать результаты',
+    //   action: handleDownloadResult,
+    // },
+    // {
+    //   text: 'Скачать бонусы команд',
+    //   action: handleDownloadTeamBonus,
+    // },
   ];
 
   const logout = () => {
@@ -146,7 +147,7 @@ export const Admin: React.FC = () => {
         >
           Выйти
         </button>
-        <div className="text-center">
+        <div className="text-center p-2">
           <Title />
         </div>
         <div

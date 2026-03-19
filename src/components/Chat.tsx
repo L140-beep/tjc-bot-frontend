@@ -5,7 +5,9 @@ import { twMerge } from 'tailwind-merge';
 import { ButtonsList } from './ButtonsList';
 import { useAuthContext } from './context/AuthContext';
 import { useNavigate } from 'react-router';
-import { saveFile } from './utils';
+// import { saveFile } from './utils';
+import { getApiUrl } from '../config';
+import { marked } from 'marked';
 
 export const Chat: React.FC = () => {
   const [message, setMessage] = useState<string | undefined>(undefined);
@@ -19,7 +21,7 @@ export const Chat: React.FC = () => {
   const [responseText, setResponseText] = useState<string[] | null>(null);
 
   useLayoutEffect(() => {
-    fetch(`api/isBlocked`, {
+    fetch(getApiUrl('/api/isBlocked'), {
       mode: 'cors',
       method: 'GET',
       headers: {
@@ -34,7 +36,7 @@ export const Chat: React.FC = () => {
 
   useEffect(() => {
     setInterval(async () => {
-      fetch(`api/isBlocked`, {
+      fetch(getApiUrl('/api/isBlocked'), {
         mode: 'cors',
         method: 'GET',
         headers: {
@@ -55,7 +57,7 @@ export const Chat: React.FC = () => {
     e.preventDefault();
     console.log(`Отправлено сообщение ${message}!`);
     setIsWaitingData(true);
-    const response = await fetch(`api/attempt`, {
+    const response = await fetch(getApiUrl('/api/attempt'), {
       mode: 'cors',
       method: 'POST',
       headers: {
@@ -85,7 +87,7 @@ export const Chat: React.FC = () => {
 
   const handleStatus = async () => {
     console.log(user.token);
-    const response = await fetch(`api/status`, {
+    const response = await fetch(getApiUrl('/api/status'), {
       mode: 'cors',
       method: 'GET',
       headers: {
@@ -97,51 +99,51 @@ export const Chat: React.FC = () => {
     setResponseText([(await response.json())['text']]);
   };
 
-  const handleDownloadTasks = async () => {
-    const response = await fetch(`api/tasks`, {
-      mode: 'cors',
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${user.token}`,
-        'Access-Control-Allow-Origin': '*',
-        accept: 'application/json',
-      },
-    });
+  // const handleDownloadTasks = async () => {
+  //   const response = await fetch(`api/tasks`, {
+  //     mode: 'cors',
+  //     method: 'GET',
+  //     headers: {
+  //       Authorization: `Bearer ${user.token}`,
+  //       'Access-Control-Allow-Origin': '*',
+  //       accept: 'application/json',
+  //     },
+  //   });
 
-    const blob = await response.blob();
-    setMessage('Сохранено!');
-    saveFile(blob, 'задания.xlsx');
-  };
+  //   const blob = await response.blob();
+  //   setMessage('Сохранено!');
+  //   saveFile(blob, 'задания.xlsx');
+  // };
 
-  const handleBonus = async () => {
-    const response = await fetch(`api/bonus`, {
-      mode: 'cors',
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${user.token}`,
-        'Access-Control-Allow-Origin': '*',
-        accept: 'application/plaintext',
-      },
-    });
-    // console.log(await response.text());
-    const blob = await response.blob();
-    setMessage('Сохранено!');
-    saveFile(blob, 'бонусы.txt');
-  };
+  // const handleBonus = async () => {
+  //   const response = await fetch(`api/bonus`, {
+  //     mode: 'cors',
+  //     method: 'GET',
+  //     headers: {
+  //       Authorization: `Bearer ${user.token}`,
+  //       'Access-Control-Allow-Origin': '*',
+  //       accept: 'application/plaintext',
+  //     },
+  //   });
+  //   // console.log(await response.text());
+  //   const blob = await response.blob();
+  //   setMessage('Сохранено!');
+  //   saveFile(blob, 'бонусы.txt');
+  // };
 
   const buttons = [
     {
       text: 'Статус',
       action: handleStatus,
     },
-    {
-      text: 'Скачать задания',
-      action: handleDownloadTasks,
-    },
-    {
-      text: 'Бонусы',
-      action: handleBonus,
-    },
+    // {
+    //   text: 'Скачать задания',
+    //   action: handleDownloadTasks,
+    // },
+    // {
+    //   text: 'Бонусы',
+    //   action: handleBonus,
+    // },
   ];
 
   const logout = () => {
@@ -174,9 +176,7 @@ export const Chat: React.FC = () => {
                 : 'Отправка сообщений разрешена'
               : responseText.map((value) => {
                   return (
-                    <p>
-                      {value} <br></br> <br />
-                    </p>
+                    <div dangerouslySetInnerHTML={{ __html: marked(Array.isArray(value) ? value.join('\n') : value) }} />
                   );
                 })}
           </div>

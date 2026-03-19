@@ -4,7 +4,7 @@ import { Title } from './Title';
 import { useAuthContext } from './context/AuthContext';
 import { twMerge } from 'tailwind-merge';
 import { useNavigate } from 'react-router';
-import { getConfig } from '../config';
+import { getApiUrl } from '../config';
 
 export const Auth: React.FC = () => {
   const context = useAuthContext();
@@ -39,8 +39,7 @@ export const Auth: React.FC = () => {
     formData.append('password', password);
     formData.append('username', login);
     try {
-      const { SERVER_HOST, SERVER_PORT } = getConfig();
-      const response = await fetch(`http://${SERVER_HOST}:${SERVER_PORT}/api/token`, {
+      const response = await fetch(getApiUrl('/api/token'), {
         mode: 'cors',
         method: 'POST',
         headers: { 'Access-Control-Allow-Origin': '*', accept: 'application/json' },
@@ -50,10 +49,15 @@ export const Auth: React.FC = () => {
         setIsWaitingData(false);
         return;
       }
-      const jsonResponse = await response.json();
-      const token = jsonResponse['access_token'];
+      const token = (await response.json())['access_token'];
+      const adminResponse = await fetch(getApiUrl('/api/token'), {
+        mode: 'cors',
+        method: 'POST',
+        headers: { 'Access-Control-Allow-Origin': '*', accept: 'application/json' },
+        body: formData,
+      }).then(async (rawResponse) => await rawResponse.json());
 
-      const isAdmin = jsonResponse['is_admin'];
+      const isAdmin = adminResponse['is_admin'];
       serCurrentUser({
         token: token,
         isAdmin: isAdmin,
