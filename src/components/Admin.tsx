@@ -6,7 +6,12 @@ import { useEffect, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { saveFile } from './utils';
 import { getApiUrl } from '../config';
-('file-saver');
+import { marked } from 'marked';
+
+marked.use({
+  breaks: true,
+  gfm: true,
+});
 
 export const Admin: React.FC = () => {
   const [message, setMessage] = useState<string | null>(null);
@@ -152,11 +157,11 @@ export const Admin: React.FC = () => {
         </div>
         <div
           className={twMerge(
-            'h-32 w-full rounded border border-gray-400 px-2 py-1 text-left text-gray-200',
+            'h-32 overflow-y-auto w-full rounded border border-gray-400 px-2 py-1 text-left text-gray-200',
             message === null && 'text-gray-500',
           )}
         >
-          {message === null ? 'Ответ от сервера...' : message}
+          {message === null ? 'Ответ от сервера...' : <div dangerouslySetInnerHTML={{ __html: marked(message) }} />}
         </div>
         <div className="mt-2">
           <ButtonsList buttonClassName="p-2 h-auto" buttons={buttons} />

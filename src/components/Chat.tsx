@@ -9,6 +9,11 @@ import { useNavigate } from 'react-router';
 import { getApiUrl } from '../config';
 import { marked } from 'marked';
 
+marked.use({
+  breaks: true,
+  gfm: true,
+});
+
 export const Chat: React.FC = () => {
   const [message, setMessage] = useState<string | undefined>(undefined);
   const [isWaitingData, setIsWaitingData] = useState<boolean>(false);
@@ -166,7 +171,7 @@ export const Chat: React.FC = () => {
         <form onSubmit={handleSubmit} className="flex flex-col items-center gap-3">
           <div
             className={twMerge(
-              'h-72 w-72 rounded border border-gray-400 px-2 py-1 text-left text-gray-200',
+              'h-72 w-72 overflow-y-auto rounded border border-gray-400 px-2 py-1 text-left text-gray-200',
               responseText === null && 'text-gray-500',
             )}
           >
